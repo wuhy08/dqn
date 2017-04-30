@@ -241,7 +241,7 @@ def train_hflip():
     task = benchmark.tasks[3]
     env = get_env(task, 0, change = hflip)
     session = get_session()
-    atari_learn_v2(env, session, 3e6, FLAGS.checkpoint_dir)
+    atari_learn_v2(env, session, task.max_timesteps, FLAGS.checkpoint_dir)
 
 
 
