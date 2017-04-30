@@ -351,3 +351,23 @@ class ReplayBuffer(object):
         self.reward[idx] = reward
         self.done[idx]   = done
 
+def get_uninitialized_variables(sess, variables=None):
+    """Get uninitialized variables as a list.
+
+    Parameters
+    ----------
+    variables : collections.Iterable[tf.Variable]
+        Return only uninitialized variables within this collection.
+        If not specified, will return all uninitialized variables.
+
+    Returns
+    -------
+    list[tf.Variable]
+    """
+    if variables is None:
+        variables = tf.global_variables()
+    else:
+        variables = list(variables)
+    init_flag = sess.run(
+        tf.stack([tf.is_variable_initialized(v) for v in variables]))
+    return [v for v, f in zip(variables, init_flag) if not f]

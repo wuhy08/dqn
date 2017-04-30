@@ -176,7 +176,7 @@ def learn(env,
     q_func_vars_train = tf.get_collection(
         tf.GraphKeys.GLOBAL_VARIABLES, 
         scope='q_func/col1'
-    )    
+    ) 
 
     ######
 
@@ -375,8 +375,8 @@ def learn(env,
             #print "NN training"
             obs_t_batch, act_batch, rew_batch, obs_tp1_batch, done_mask = replay_buffer.sample(batch_size)
             if not model_initialized:
-                global_variables = tf.global_variables()
-                initialize_interdependent_variables(session, global_variables, {
+                uninitialized_variables = get_uninitialized_variables(session)
+                initialize_interdependent_variables(session, uninitialized_variables, {
                     obs_t_ph: obs_t_batch,
                     obs_tp1_ph: obs_tp1_batch
                     }

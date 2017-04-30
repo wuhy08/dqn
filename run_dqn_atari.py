@@ -145,7 +145,7 @@ def atari_learn_v2(env, session, num_timesteps, filename):
         replay_buffer_size=1000000,
         batch_size=32,
         gamma=0.99,
-        learning_starts=30000,
+        learning_starts=100,
         learning_freq=4,
         frame_history_len=4,
         target_update_freq=10000,
