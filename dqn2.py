@@ -194,7 +194,7 @@ def learn(env,
     update_target_fn = tf.group(*update_target_fn)
 
     nn_saver = tf.train.Saver(q_func_vars, max_to_keep=1)
-    nn_saver_freq = 50000
+    nn_saver_freq = 10000
     time_str = strftime("%Y%m%d-%H%M%S", gmtime())
 
     # evaluation_steps = 50000
