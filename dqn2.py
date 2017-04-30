@@ -392,7 +392,7 @@ def learn(env,
                 learning_rate:optimizer_spec.lr_schedule.value(t)
                 })
             if num_param_updates%nn_saver_freq == 0:
-                filename_nn_saver = "log/nn_" + time_str
+                filename_nn_saver = "/mnt/dqn/nn_" + time_str
                 nn_saver.save(session, filename_nn_saver, global_step=t)
                 print "Successfully save file "+filename_nn_saver
             num_param_updates += 1
