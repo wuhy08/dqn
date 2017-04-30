@@ -1,0 +1,2 @@
+time, mean reward 100 episode, best mean reward, episodes, exploration, learning rate
+40000, -20.770000, -20.700000, 187, 0.964000, 0.000100
