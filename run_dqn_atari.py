@@ -27,6 +27,8 @@ FLAGS = tf.flags.FLAGS
 
 POLICY_DIR = "saved_policy.pkl"
 
+BRANCH_LAYER = 2
+
 def atari_model(img_in, num_actions, scope, reuse=False):
     # as described in https://storage.googleapis.com/deepmind-data/assets/papers/DeepMindNature14236Paper.pdf
     with tf.variable_scope(scope, reuse=reuse):
@@ -215,7 +217,7 @@ def main():
     session = get_session()
     atari_learn(env, session, train_time_scale*task.max_timesteps, filename)
 
-def pnn_model(img_in, num_actions, session, scope, reuse=False, branch_layer=1):
+def pnn_model(img_in, num_actions, session, scope, reuse=False, branch_layer=BRANCH_LAYER):
     pnn = create_pnn_pong(session, scope, img_in, branch_layer, reuse)
     pnn.add_col(num_actions)
     output_action = pnn.get_q_val_of_col(1)
