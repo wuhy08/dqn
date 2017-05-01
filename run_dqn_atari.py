@@ -23,11 +23,19 @@ tf.flags.DEFINE_string("env", "PongNoFrameskip-v3",
                        "Name of gym Atari environment, e.g. Breakout-v0")
 tf.flags.DEFINE_string("checkpoint_dir", None, 
                        "if not None, restore from checkpoint_dir")
+tf.flags.DEFINE_integer("branch_layer", 1, 
+                       "if not None, restore from checkpoint_dir")
+tf.flags.DEFINE_string("change", None, 
+                       "if not None, restore from checkpoint_dir")
+tf.flags.DEFINE_string("save_dir", "/tmp", 
+                       "if not None, restore from checkpoint_dir")
 FLAGS = tf.flags.FLAGS
 
 POLICY_DIR = "saved_policy.pkl"
 
-BRANCH_LAYER = 2
+BRANCH_LAYER = FLAGS.branch_layer
+SAVE_DIR = FLAGS.save_dir
+CHANGE = eval(FLAGS.change) if FLAGS.change is not None else None
 
 def atari_model(img_in, num_actions, scope, reuse=False):
     # as described in https://storage.googleapis.com/deepmind-data/assets/papers/DeepMindNature14236Paper.pdf
@@ -101,7 +109,7 @@ def atari_learn(
     )
     env.close()
 
-def atari_learn_v2(env, session, num_timesteps, filename):
+def atari_learn_v2(env, session, num_timesteps, filename, save_dir):
     # This is just a rough estimate
     num_iterations = float(num_timesteps)/4.0
 
@@ -152,7 +160,8 @@ def atari_learn_v2(env, session, num_timesteps, filename):
         frame_history_len=4,
         target_update_freq=10000,
         grad_norm_clipping=10,
-        filename = filename
+        filename = filename,
+        save_dir = save_dir
     )
     env.close()
 
@@ -238,12 +247,12 @@ def create_pnn_pong(session, nn_name, x, branch_layer=1, reuse = False):
     pnn.assign_values_to_col_temp(v_w, session)
     return pnn
 
-def train_hflip():
+def train_variation():
     benchmark = gym.benchmark_spec('Atari40M')
     task = benchmark.tasks[3]
-    env = get_env(task, 0, change = hflip)
+    env = get_env(task, 0, change = CHANGE)
     session = get_session()
-    atari_learn_v2(env, session, task.max_timesteps, FLAGS.checkpoint_dir)
+    atari_learn_v2(env, session, task.max_timesteps, FLAGS.checkpoint_dir, SAVE_DIR)
 
 
 
@@ -253,11 +262,11 @@ def replay(env, session, policy_dir):
     structure = [(84, 84, 4), (8, 8, 4, 32), (4, 4, 2, 64), (3, 3, 1, 64), (512,)]
     obs_for_task = tf.placeholder(tf.uint8, [None, 84, 84, 4])
     obs_for_task_float = tf.cast(obs_for_task, tf.float32) / 255.0
-    pnn = PNN("pnn", structure, obs_for_task_float)
+    pnn = PNN("q_func", structure, obs_for_task_float)
     pnn.add_col(6)
-    with open("saved_policy.pkl", 'r+') as f:
-        v_w = pickle.load(f)
-    pnn.assign_values_to_col_temp(v_w, session)
+    pnn.add_col(6)
+    loader = tf.train.Saver()
+    loader.restore(session, policy_dir)
     action_for_task = tf.argmax(pnn.get_q_val_of_col(0), 1)
     replay_buffer = ReplayBuffer(10, 4)
     obs = env.reset()
@@ -285,10 +294,10 @@ def replay(env, session, policy_dir):
 def play():
     benchmark = gym.benchmark_spec('Atari40M')
     task = benchmark.tasks[3]
-    env = get_env(task, 0)
+    env = get_env(task, 0, change = None)
     session = get_session()
-    replay(env, session, 'saved/nn_20170306-025027-3250004')
+    replay(env, session, "saved/TNN_layer_1/nn_20170430-172122-1450004")
 
 
 if __name__ == "__main__":
-    train_hflip()
+    train_variation()

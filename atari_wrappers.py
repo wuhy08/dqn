@@ -114,6 +114,9 @@ def _process_frame84(frame):
 def _horizontal_flip(frame):
     return frame[::-1]
 
+def _vertical_flip(frame):
+    return np.fliplr(frame)
+
 class ProcessFrame84(gym.Wrapper):
     def __init__(self, env=None):
         super(ProcessFrame84, self).__init__(env)
@@ -139,6 +142,14 @@ class HFlipWrapper(gym.Wrapper):
     def _reset(self):
         return _horizontal_flip(self.env.reset())
 
+class VFlipWrapper(gym.Wrapper):
+    def _step(self, action):
+        obs, reward, done, info = self.env.step(action)
+        return _vertical_flip(obs), reward, done, info
+
+    def _reset(self):
+        return _vertical_flip(self.env.reset())
+
 def wrap_deepmind_ram(env):
     env = EpisodicLifeEnv(env)
     env = NoopResetEnv(env, noop_max=30)
@@ -161,3 +172,6 @@ def wrap_deepmind(env):
 
 def hflip(env):
     return HFlipWrapper(env)
+
+def vflip(env):
+    return VFlipWrapper(env)
