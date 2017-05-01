@@ -29,6 +29,7 @@ tf.flags.DEFINE_string("change", None,
                        "if not None, restore from checkpoint_dir")
 tf.flags.DEFINE_string("save_dir", "/tmp", 
                        "if not None, restore from checkpoint_dir")
+
 FLAGS = tf.flags.FLAGS
 
 POLICY_DIR = "saved_policy.pkl"
@@ -36,6 +37,7 @@ POLICY_DIR = "saved_policy.pkl"
 BRANCH_LAYER = FLAGS.branch_layer
 SAVE_DIR = FLAGS.save_dir
 CHANGE = eval(FLAGS.change) if FLAGS.change is not None else None
+ENV = FLAGS.env
 
 def atari_model(img_in, num_actions, scope, reuse=False):
     # as described in https://storage.googleapis.com/deepmind-data/assets/papers/DeepMindNature14236Paper.pdf
@@ -249,7 +251,14 @@ def create_pnn_pong(session, nn_name, x, branch_layer=1, reuse = False):
 
 def train_variation():
     benchmark = gym.benchmark_spec('Atari40M')
-    task = benchmark.tasks[3]
+    task_dict = {"BeamRiderNoFrameskip-v3":0, 
+                "BreakoutNoFrameskip-v3":1,
+                "EnduroNoFrameskip-v3":2,
+                "PongNoFrameskip-v3":3,
+                "QbertNoFrameskip-v3":4,
+                "SeaquestNoFrameskip-v3":5,
+                "SpaceInvadersNoFrameskip-v3":6}
+    task = benchmark.tasks[task_dict[ENV]]
     env = get_env(task, 0, change = CHANGE)
     session = get_session()
     atari_learn_v2(env, session, task.max_timesteps, FLAGS.checkpoint_dir, SAVE_DIR)

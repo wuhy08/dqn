@@ -5,7 +5,7 @@ import numpy as np
 #import constants
 import pickle
 import tensorflow.contrib.layers as layers
-import IPython
+#import IPython
 
 
 #FLAGS = tf.app.flags.FLAGS
