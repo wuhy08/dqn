@@ -29,8 +29,8 @@ tf.flags.DEFINE_string("change", None,
                        "if not None, restore from checkpoint_dir")
 tf.flags.DEFINE_string("save_dir", "/tmp", 
                        "if not None, restore from checkpoint_dir")
-flags.DEFINE_boolean('from_scratch', False, 'If true, train from scratch.')
-flags.DEFINE_boolean('replay', False, 'If true, replay.')
+tf.flags.DEFINE_boolean('from_scratch', False, 'If true, train from scratch.')
+tf.flags.DEFINE_boolean('replay', False, 'If true, replay.')
 
 FLAGS = tf.flags.FLAGS
 
