@@ -29,6 +29,8 @@ tf.flags.DEFINE_string("change", None,
                        "if not None, restore from checkpoint_dir")
 tf.flags.DEFINE_string("save_dir", "/tmp", 
                        "if not None, restore from checkpoint_dir")
+flags.DEFINE_boolean('from_scratch', False, 'If true, train from scratch.')
+flags.DEFINE_boolean('replay', False, 'If true, replay.')
 
 FLAGS = tf.flags.FLAGS
 
@@ -55,10 +57,7 @@ def atari_model(img_in, num_actions, scope, reuse=False):
 
         return out
 
-def atari_learn(
-    env,
-    session,
-    num_timesteps, filename):
+def atari_learn(env, session, num_timesteps, filename, save_dir):
     # This is just a rough estimate
     num_iterations = float(num_timesteps)/4.0
 
@@ -107,7 +106,8 @@ def atari_learn(
         frame_history_len=4,
         target_update_freq=10000,
         grad_norm_clipping=10,
-        filename = filename
+        filename = filename,
+        save_dir = save_dir
     )
     env.close()
 
@@ -208,7 +208,7 @@ def get_env(task, seed, change = None):
     else:
         return env
 
-def main():
+def train():
     # Get Atari games.
     benchmark = gym.benchmark_spec('Atari40M')
 
@@ -221,12 +221,11 @@ def main():
                 "SeaquestNoFrameskip-v3":5,
                 "SpaceInvadersNoFrameskip-v3":6}
     task = benchmark.tasks[task_dict[FLAGS.env]]
-    filename = FLAGS.checkpoint_dir
     # Run training
     seed = 0 # Use a seed of zero (you may want to randomize the seed!)
     env = get_env(task, seed)
     session = get_session()
-    atari_learn(env, session, train_time_scale*task.max_timesteps, filename)
+    atari_learn(env, session, train_time_scale*task.max_timesteps, FLAGS.checkpoint_dir, SAVE_DIR)
 
 def pnn_model(img_in, num_actions, session, scope, reuse=False, branch_layer=BRANCH_LAYER):
     pnn = create_pnn_pong(session, scope, img_in, branch_layer, reuse)
@@ -309,4 +308,15 @@ def play():
 
 
 if __name__ == "__main__":
-    train_variation()
+    if FLAGS.replay:
+        play()
+    elif FLAGS.from_scratch:
+        train()
+    else:
+        train_variation()
+
+
+
+
+
+
